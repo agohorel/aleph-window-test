@@ -1,23 +1,95 @@
-const dragItem = document.querySelector(".drag-item");
-const dropTargets = document.querySelectorAll(".drop-target");
+class ResizableWindow {
+  constructor(props) {
+    this.parent = props.parent;
+    this.component = null;
+    this.resizableMargin = 15;
+    this.width = 300;
+    this.height = 300;
+    this.isResizable = false;
+    this.resizeFrom = null;
+    this.x = props.x;
+    this.y = props.y;
+    this.initialX = null;
+    this.initialY = null;
+    this.initialMouseX = null;
+    this.initialMouseY = null;
+    this.initialWidth = null;
+    this.initialHeight = null;
+  }
 
-function allowDrop(e) {
-  e.preventDefault();
+  createComponent = () => {
+    const component = document.createElement("div");
+    component.style.width = `${this.width}px`;
+    component.style.height = `${this.height}px`;
+    component.style.left = `${this.x}px`;
+    component.style.top = `${this.y}px`;
+    component.classList.add("pane");
+    this.component = component;
+    this.attachEventListeners();
+    document.querySelector(this.parent).appendChild(this.component);
+  };
+
+  attachEventListeners = () => {
+    this.component.addEventListener("mousedown", this.onMouseDown);
+    document.addEventListener("mouseup", this.onMouseUp);
+    document.addEventListener("mousemove", this.onMouseMove);
+  };
+
+  onMouseDown = e => {
+    e.preventDefault();
+    this.checkIfResizableArea(e);
+  };
+
+  checkIfResizableArea = e => {
+    if (e.offsetX > this.width - this.resizableMargin) {
+      this.isResizable = true;
+      this.resizeFrom = "right";
+    } else if (e.offsetX < this.resizableMargin) {
+      this.isResizable = true;
+      this.resizeFrom = "left";
+    } else if (e.offsetY > this.height - this.resizableMargin) {
+      this.isResizable = true;
+      this.resizeFrom = "bottom";
+    } else if (e.offsetY < this.resizableMargin) {
+      this.isResizable = true;
+      this.resizeFrom = "top";
+    }
+    this.initialMouseX = e.pageX;
+    this.initialMouseY = e.pageY;
+    this.initialX = this.x;
+    this.initialY = this.y;
+    this.initialWidth = this.width;
+    this.initialHeight = this.height;
+  };
+
+  onMouseUp = () => {
+    this.isResizable = false;
+    this.resizeFrom = null;
+    this.initialMouseX = null;
+    this.initialMouseY = null;
+  };
+
+  onMouseMove = e => {
+    if (this.isResizable) {
+      this.updateWidth(e);
+    }
+  };
+
+  updateWidth = e => {
+    if (this.resizeFrom === "right") {
+      this.width = e.pageX - this.component.getBoundingClientRect().left;
+      this.component.style.width = `${this.width}px`;
+    } else if (this.resizeFrom === "left") {
+      this.x = this.initialX + (e.pageX - this.initialMouseX);
+      this.component.style.left = `${this.x}px`;
+      this.width = this.initialWidth - (e.pageX - this.initialMouseX);
+      this.component.style.width = `${this.width}px`;
+    }
+  };
 }
 
-function drag(e) {
-  e.dataTransfer.setData("text", e.target.className);
-}
-
-function drop(e) {
-  e.preventDefault();
-  const item = e.dataTransfer.getData("text");
-  e.target.appendChild(document.querySelector(`.${item}`));
-}
-
-dropTargets.forEach(target => {
-  target.addEventListener("dragover", allowDrop);
-  target.addEventListener("drop", drop);
-});
-
-dragItem.addEventListener("dragstart", drag);
+const resizable = new ResizableWindow({
+  parent: "body",
+  x: 200,
+  y: 200
+}).createComponent();

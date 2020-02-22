@@ -16,7 +16,17 @@ body {
   background: var(--aleph-nearblack);
 }
 
-div {
+p {
+  color: var(--aleph-lightgrey);
+}
+
+.pane {
+  position: absolute;
+  display: inline-block;
+  background-color: var(--aleph-darkgrey);
+}
+
+/* div {
   margin: 1rem;
 }
 
@@ -33,4 +43,4 @@ div {
   display: flex;
   justify-content: center;
   align-items: center;
-}
+} */
