@@ -84,6 +84,14 @@ class ResizableWindow {
       this.component.style.left = `${this.x}px`;
       this.width = this.initialWidth - (e.pageX - this.initialMouseX);
       this.component.style.width = `${this.width}px`;
+    } else if (this.resizeFrom === "bottom") {
+      this.height = e.pageY - this.component.getBoundingClientRect().top;
+      this.component.style.height = `${this.height}px`;
+    } else if (this.resizeFrom === "top") {
+      this.y = this.initialY + (e.pageY - this.initialMouseY);
+      this.component.style.top = `${this.y}px`;
+      this.height = this.initialHeight - (e.pageY - this.initialMouseY);
+      this.component.style.height = `${this.height}px`;
     }
   };
 }
