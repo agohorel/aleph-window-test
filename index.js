@@ -31,6 +31,7 @@ class ResizableWindow {
 
   attachEventListeners = () => {
     this.component.addEventListener("mousedown", this.onMouseDown);
+    this.component.addEventListener("mousemove", this.showResizeHandles);
     document.addEventListener("mouseup", this.onMouseUp);
     document.addEventListener("mousemove", this.onMouseMove);
   };
@@ -71,11 +72,11 @@ class ResizableWindow {
 
   onMouseMove = e => {
     if (this.isResizable) {
-      this.updateWidth(e);
+      this.transform(e);
     }
   };
 
-  updateWidth = e => {
+  transform = e => {
     if (this.resizeFrom === "right") {
       this.width = e.pageX - this.component.getBoundingClientRect().left;
       this.component.style.width = `${this.width}px`;
@@ -92,6 +93,20 @@ class ResizableWindow {
       this.component.style.top = `${this.y}px`;
       this.height = this.initialHeight - (e.pageY - this.initialMouseY);
       this.component.style.height = `${this.height}px`;
+    }
+  };
+
+  showResizeHandles = e => {
+    if (e.offsetX > this.width - this.resizableMargin) {
+      this.component.style.cursor = "e-resize";
+    } else if (e.offsetX < this.resizableMargin) {
+      this.component.style.cursor = "w-resize";
+    } else if (e.offsetY > this.height - this.resizableMargin) {
+      this.component.style.cursor = "s-resize";
+    } else if (e.offsetY < this.resizableMargin) {
+      this.component.style.cursor = "n-resize";
+    } else {
+      this.component.style.cursor = "default";
     }
   };
 }
