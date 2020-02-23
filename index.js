@@ -2,10 +2,12 @@ class ResizableWindow {
   constructor(props) {
     this.parent = props.parent;
     this.component = null;
+    this.moveHandle = null;
     this.resizableMargin = 15;
     this.width = 300;
     this.height = 300;
     this.isResizable = false;
+    this.isMovable = false;
     this.resizeFrom = null;
     this.x = props.x;
     this.y = props.y;
@@ -15,6 +17,7 @@ class ResizableWindow {
     this.initialMouseY = null;
     this.initialWidth = null;
     this.initialHeight = null;
+    this.moveHandleHeight = 35;
   }
 
   createComponent = () => {
@@ -25,36 +28,78 @@ class ResizableWindow {
     component.style.top = `${this.y}px`;
     component.classList.add("pane");
     this.component = component;
+
+    const moveHandle = document.createElement("div");
+    moveHandle.style.width = `${this.width}px`;
+    moveHandle.style.height = `${this.moveHandleHeight}px`;
+    moveHandle.classList.add("move-handle");
+    this.moveHandle = moveHandle;
+
     this.attachEventListeners();
+
+    component.appendChild(moveHandle);
     document.querySelector(this.parent).appendChild(this.component);
   };
 
   attachEventListeners = () => {
     this.component.addEventListener("mousedown", this.onMouseDown);
     this.component.addEventListener("mousemove", this.showResizeHandles);
+
+    this.moveHandle.addEventListener("mousedown", this.move_onMouseDown);
+    this.moveHandle.addEventListener("mouseup", this.move_onMouseUp);
+
     document.addEventListener("mouseup", this.onMouseUp);
     document.addEventListener("mousemove", this.onMouseMove);
   };
 
+  checkIfMoveableArea = e => {
+    if (
+      e.offsetX < this.width - this.resizableMargin &&
+      e.offsetX > this.resizableMargin &&
+      e.offsetY < this.moveHandleHeight &&
+      e.offsetY > this.resizableMargin
+    ) {
+      return true;
+    }
+  };
+
+  move_onMouseDown = e => {
+    e.preventDefault();
+    if (this.checkIfMoveableArea(e)) {
+      e.stopPropagation();
+      this.isMovable = true;
+    }
+  };
+
+  move_onMouseUp = () => {
+    this.isMovable = false;
+  };
+
+  move = e => {
+    this.x = e.pageX;
+    this.y = e.pageY;
+    this.component.style.top = `${this.y}px`;
+    this.component.style.left = `${this.x}px`;
+  };
+
   onMouseDown = e => {
     e.preventDefault();
+    e.stopPropagation();
     this.checkIfResizableArea(e);
   };
 
   checkIfResizableArea = e => {
     if (e.offsetX > this.width - this.resizableMargin) {
-      this.isResizable = true;
       this.resizeFrom = "right";
     } else if (e.offsetX < this.resizableMargin) {
-      this.isResizable = true;
       this.resizeFrom = "left";
     } else if (e.offsetY > this.height - this.resizableMargin) {
-      this.isResizable = true;
       this.resizeFrom = "bottom";
     } else if (e.offsetY < this.resizableMargin) {
-      this.isResizable = true;
       this.resizeFrom = "top";
     }
+
+    this.isResizable = true;
     this.initialMouseX = e.pageX;
     this.initialMouseY = e.pageY;
     this.initialX = this.x;
@@ -72,7 +117,12 @@ class ResizableWindow {
 
   onMouseMove = e => {
     if (this.isResizable) {
+      // rough grid snapping
+      // if (e.pageX % 50 === 0 || e.pageY % 50 === 0) {
       this.transform(e);
+      // }
+    } else if (this.isMovable) {
+      this.move(e);
     }
   };
 
@@ -80,11 +130,13 @@ class ResizableWindow {
     if (this.resizeFrom === "right") {
       this.width = e.pageX - this.component.getBoundingClientRect().left;
       this.component.style.width = `${this.width}px`;
+      this.moveHandle.style.width = `${this.width}px`;
     } else if (this.resizeFrom === "left") {
       this.x = this.initialX + (e.pageX - this.initialMouseX);
       this.component.style.left = `${this.x}px`;
       this.width = this.initialWidth - (e.pageX - this.initialMouseX);
       this.component.style.width = `${this.width}px`;
+      this.moveHandle.style.width = `${this.width}px`;
     } else if (this.resizeFrom === "bottom") {
       this.height = e.pageY - this.component.getBoundingClientRect().top;
       this.component.style.height = `${this.height}px`;
@@ -97,7 +149,9 @@ class ResizableWindow {
   };
 
   showResizeHandles = e => {
-    if (e.offsetX > this.width - this.resizableMargin) {
+    if (this.checkIfMoveableArea(e)) {
+      this.component.style.cursor = "move";
+    } else if (e.offsetX > this.width - this.resizableMargin) {
       this.component.style.cursor = "e-resize";
     } else if (e.offsetX < this.resizableMargin) {
       this.component.style.cursor = "w-resize";

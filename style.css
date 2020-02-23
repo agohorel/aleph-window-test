@@ -26,21 +26,7 @@ p {
   background-color: var(--aleph-darkgrey);
 }
 
-/* div {
-  margin: 1rem;
+.move-handle {
+  position: relative;
+  background-color: var(--aleph-blue);
 }
-
-.drag-item {
-  width: 150px;
-  height: 150px;
-  background: var(--aleph-blue);
-}
-
-.drop-target {
-  width: 200px;
-  height: 200px;
-  background: var(--aleph-darkgrey);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-} */
