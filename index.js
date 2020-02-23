@@ -68,16 +68,20 @@ class ResizableWindow {
     if (this.checkIfMoveableArea(e)) {
       e.stopPropagation();
       this.isMovable = true;
+      this.initialMouseX = e.offsetX;
+      this.initialMouseY = e.offsetY;
     }
   };
 
   move_onMouseUp = () => {
     this.isMovable = false;
+    this.initialMouseX = null;
+    this.initialMouseY = null;
   };
 
   move = e => {
-    this.x = e.pageX;
-    this.y = e.pageY;
+    this.x = e.pageX - this.initialMouseX;
+    this.y = e.pageY - this.initialMouseY;
     this.component.style.top = `${this.y}px`;
     this.component.style.left = `${this.x}px`;
   };
