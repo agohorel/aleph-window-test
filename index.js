@@ -93,7 +93,27 @@ class ResizableWindow {
   };
 
   checkIfResizableArea = e => {
-    if (e.offsetX > this.width - this.resizableMargin) {
+    if (
+      e.offsetX > this.width - this.resizableMargin &&
+      e.offsetY > this.height - this.resizableMargin
+    ) {
+      this.resizeFrom = "bottom-right";
+    } else if (
+      e.offsetX > this.width - this.resizableMargin &&
+      e.offsetY < this.resizableMargin
+    ) {
+      this.resizeFrom = "top-right";
+    } else if (
+      e.offsetX < this.resizableMargin &&
+      e.offsetY > this.height - this.resizableMargin
+    ) {
+      this.resizeFrom = "bottom-left";
+    } else if (
+      e.offsetX < this.resizableMargin &&
+      e.offsetY < this.resizableMargin
+    ) {
+      this.resizeFrom = "top-left";
+    } else if (e.offsetX > this.width - this.resizableMargin) {
       this.resizeFrom = "right";
     } else if (e.offsetX < this.resizableMargin) {
       this.resizeFrom = "left";
@@ -121,10 +141,7 @@ class ResizableWindow {
 
   onMouseMove = e => {
     if (this.isResizable) {
-      // rough grid snapping
-      // if (e.pageX % 50 === 0 || e.pageY % 50 === 0) {
       this.transform(e);
-      // }
     } else if (this.isMovable) {
       this.move(e);
     }
@@ -132,29 +149,77 @@ class ResizableWindow {
 
   transform = e => {
     if (this.resizeFrom === "right") {
-      this.width = e.pageX - this.component.getBoundingClientRect().left;
-      this.component.style.width = `${this.width}px`;
-      this.moveHandle.style.width = `${this.width}px`;
+      this.resizeRight(e);
     } else if (this.resizeFrom === "left") {
-      this.x = this.initialX + (e.pageX - this.initialMouseX);
-      this.component.style.left = `${this.x}px`;
-      this.width = this.initialWidth - (e.pageX - this.initialMouseX);
-      this.component.style.width = `${this.width}px`;
-      this.moveHandle.style.width = `${this.width}px`;
+      this.resizeLeft(e);
     } else if (this.resizeFrom === "bottom") {
-      this.height = e.pageY - this.component.getBoundingClientRect().top;
-      this.component.style.height = `${this.height}px`;
+      this.resizeBottom(e);
     } else if (this.resizeFrom === "top") {
-      this.y = this.initialY + (e.pageY - this.initialMouseY);
-      this.component.style.top = `${this.y}px`;
-      this.height = this.initialHeight - (e.pageY - this.initialMouseY);
-      this.component.style.height = `${this.height}px`;
+      this.resizeTop(e);
+    } else if (this.resizeFrom === "top-right") {
+      this.resizeRight(e);
+      this.resizeTop(e);
+    } else if (this.resizeFrom === "bottom-right") {
+      this.resizeRight(e);
+      this.resizeBottom(e);
+    } else if (this.resizeFrom === "top-left") {
+      this.resizeLeft(e);
+      this.resizeTop(e);
+    } else if (this.resizeFrom === "bottom-left") {
+      this.resizeLeft(e);
+      this.resizeBottom(e);
     }
+  };
+
+  resizeRight = e => {
+    this.width = e.pageX - this.component.getBoundingClientRect().left;
+    this.component.style.width = `${this.width}px`;
+    this.moveHandle.style.width = `${this.width}px`;
+  };
+
+  resizeLeft = e => {
+    this.x = this.initialX + (e.pageX - this.initialMouseX);
+    this.component.style.left = `${this.x}px`;
+    this.width = this.initialWidth - (e.pageX - this.initialMouseX);
+    this.component.style.width = `${this.width}px`;
+    this.moveHandle.style.width = `${this.width}px`;
+  };
+
+  resizeTop = e => {
+    this.y = this.initialY + (e.pageY - this.initialMouseY);
+    this.component.style.top = `${this.y}px`;
+    this.height = this.initialHeight - (e.pageY - this.initialMouseY);
+    this.component.style.height = `${this.height}px`;
+  };
+
+  resizeBottom = e => {
+    this.height = e.pageY - this.component.getBoundingClientRect().top;
+    this.component.style.height = `${this.height}px`;
   };
 
   showResizeHandles = e => {
     if (this.checkIfMoveableArea(e)) {
       this.component.style.cursor = "move";
+    } else if (
+      e.offsetX > this.width - this.resizableMargin &&
+      e.offsetY > this.height - this.resizableMargin
+    ) {
+      this.component.style.cursor = "se-resize";
+    } else if (
+      e.offsetX > this.width - this.resizableMargin &&
+      e.offsetY < this.resizableMargin
+    ) {
+      this.component.style.cursor = "ne-resize";
+    } else if (
+      e.offsetX < this.resizableMargin &&
+      e.offsetY > this.height - this.resizableMargin
+    ) {
+      this.component.style.cursor = "sw-resize";
+    } else if (
+      e.offsetX < this.resizableMargin &&
+      e.offsetY < this.resizableMargin
+    ) {
+      this.component.style.cursor = "nw-resize";
     } else if (e.offsetX > this.width - this.resizableMargin) {
       this.component.style.cursor = "e-resize";
     } else if (e.offsetX < this.resizableMargin) {
@@ -163,14 +228,30 @@ class ResizableWindow {
       this.component.style.cursor = "s-resize";
     } else if (e.offsetY < this.resizableMargin) {
       this.component.style.cursor = "n-resize";
-    } else {
-      this.component.style.cursor = "default";
     }
   };
 }
 
-const resizable = new ResizableWindow({
+new ResizableWindow({
   parent: "body",
   x: 200,
   y: 200
+}).createComponent();
+
+new ResizableWindow({
+  parent: "body",
+  x: 550,
+  y: 200
+}).createComponent();
+
+new ResizableWindow({
+  parent: "body",
+  x: 200,
+  y: 550
+}).createComponent();
+
+new ResizableWindow({
+  parent: "body",
+  x: 550,
+  y: 550
 }).createComponent();
