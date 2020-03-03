@@ -3,7 +3,7 @@ class ResizableWindow {
     this.parent = props.parent;
     this.component = null;
     this.moveHandle = null;
-    this.resizableMargin = 15;
+    this.resizableMargin = 10;
     this.width = 300;
     this.height = 300;
     this.isResizable = false;
