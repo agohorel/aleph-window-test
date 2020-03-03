@@ -18,6 +18,9 @@ class ResizableWindow {
     this.initialWidth = null;
     this.initialHeight = null;
     this.moveHandleHeight = 35;
+    this.isWindowBeingResized = false;
+    this.windowBeforeResize = null;
+    this.windowAfterResize = null;
   }
 
   createComponent = () => {
@@ -36,6 +39,9 @@ class ResizableWindow {
     this.moveHandle = moveHandle;
 
     this.attachEventListeners();
+    this.debounce(500, () => {
+      this.resizeWindows();
+    });
 
     component.appendChild(moveHandle);
     document.querySelector(this.parent).appendChild(this.component);
@@ -229,6 +235,39 @@ class ResizableWindow {
     } else if (e.offsetY < this.resizableMargin) {
       this.component.style.cursor = "n-resize";
     }
+  };
+
+  debounce = (delay, callback) => {
+    window.addEventListener("resize", this.runDebounce(delay, callback));
+  };
+
+  runDebounce = (delay, callback) => {
+    let debouncer;
+    return (this.curried = () => {
+      if (!this.isWindowBeingResized) {
+        this.isWindowBeingResized = true;
+        this.windowBeforeResize = {
+          x: window.innerWidth,
+          y: window.innerHeight
+        };
+      }
+      clearTimeout(debouncer);
+      debouncer = setTimeout(() => {
+        this.isWindowBeingResized = false;
+        this.windowAfterResize = {
+          x: window.innerWidth,
+          y: window.innerHeight
+        };
+        callback();
+      }, delay);
+    });
+  };
+
+  resizeWindows = () => {
+    const widthRatio = this.windowAfterResize.x / this.windowBeforeResize.x;
+    this.width *= widthRatio;
+    this.component.style.width = `${this.width}px`;
+    this.moveHandle.style.width = `${this.width}px`;
   };
 }
 
