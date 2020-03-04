@@ -4,7 +4,7 @@ class ResizableWindow {
     this.component = null;
     this.moveHandle = null;
     this.resizableMargin = 10;
-    this.width = 300;
+    this.width = window.innerWidth / 6;
     this.height = 300;
     this.isResizable = false;
     this.isMovable = false;
@@ -264,33 +264,45 @@ class ResizableWindow {
   };
 
   resizeWindows = () => {
+    this.component.style.transition = "0.2s ease-out all";
+    this.moveHandle.style.transition = "0.2s ease-out all";
+
     const widthRatio = this.windowAfterResize.x / this.windowBeforeResize.x;
     this.width *= widthRatio;
     this.component.style.width = `${this.width}px`;
     this.moveHandle.style.width = `${this.width}px`;
+
+    this.x *= widthRatio;
+    this.component.style.left = `${this.x}px`;
+
+    // @todo add promise
+    setTimeout(() => {
+      this.component.style.transition = "none";
+      this.moveHandle.style.transition = "none";
+    }, 500);
   };
 }
 
 new ResizableWindow({
   parent: "body",
-  x: 200,
-  y: 200
+  x: window.innerWidth / 4,
+  y: window.innerHeight / 4 - 50
 }).createComponent();
 
 new ResizableWindow({
   parent: "body",
-  x: 550,
-  y: 200
+  x: window.innerWidth / 2,
+  y: window.innerHeight / 4 - 50
 }).createComponent();
 
 new ResizableWindow({
   parent: "body",
-  x: 200,
-  y: 550
+  x: window.innerWidth / 4,
+  y: window.innerHeight / 2 + 50
 }).createComponent();
 
 new ResizableWindow({
   parent: "body",
-  x: 550,
-  y: 550
+  x: window.innerWidth / 2,
+  y: window.innerHeight / 2 + 50
 }).createComponent();
