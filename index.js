@@ -21,6 +21,7 @@ class ResizableWindow {
     this.isWindowBeingResized = false;
     this.windowBeforeResize = null;
     this.windowAfterResize = null;
+    this.zIndex = 0;
   }
 
   createComponent = () => {
@@ -76,7 +77,20 @@ class ResizableWindow {
       this.isMovable = true;
       this.initialMouseX = e.offsetX;
       this.initialMouseY = e.offsetY;
+      this.zIndex = this.findHighestZIndex() + 1;
+      this.component.style.zIndex = `${this.zIndex}`;
     }
+  };
+
+  findHighestZIndex = () => {
+    let record = 0;
+    const panes = document.querySelectorAll(".pane");
+    panes.forEach(pane => {
+      if (pane.style.zIndex > record) {
+        record = Number(pane.style.zIndex);
+      }
+    });
+    return record;
   };
 
   move_onMouseUp = () => {
